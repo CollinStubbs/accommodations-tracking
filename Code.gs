@@ -3,23 +3,66 @@ function onOpen() {
   ui.createMenu('Tracking Sheets')
   .addItem("Create new Tracking Sheets", "newYearSheets")
   .addItem("Archive Tracking Sheets", "archiveSheets")
-   .addItem("Archive IIPs", "archiveIIPs")
+  .addItem("Archive IIPs", "archiveIIPs")
   //.addItem("Remove Last Sheet", "removeLastSheet")//too dangerous
   .addToUi();
 }
+
 function archiveIIPs(){
- var yearFolders = DriveApp.getFolderById("0B1FKC1RnG8DpNGNmYV9FWEt6eWc").getFolders();
+  var yearFolders = DriveApp.getFolderById("0B1FKC1RnG8DpNGNmYV9FWEt6eWc").getFolders();
   while(yearFolders.hasNext()){
     var yearHolder = yearFolders.next();
     var yearFiles = yearHolder.getFiles();
     while(yearFiles.hasNext()){
-     var yrFileHolder = yearFiles.next();
+      var yrFileHolder = yearFiles.next();
       var names = getArrayNames(yrFileHolder);
+      var studentArchiveFolder = findArchiveFolder(names, getStudentYear(yearHolder.getName()));
+      var theBlob = yrFileHolder.getBlob().getAs('application/pdf').setName(yrFileHolder.getName());
+      var newFile = studentArchiveFolder.createFile(theBlob);
     }
   }
 }
-function getArrayNames(yearFile){
+
+function findArchiveFolder(names, studentYear){
+  var archYearFolders = DriveApp.getFolderById("0B1FKC1RnG8DpVnBUNUdIeklsVmM").getFolders();
+  while(archYearFolders.hasNext()){
+    var folderHolder = archYearFolders.next();
+    if(folderHolder.getName().indexOf(studentYear) > -1){
+      var studentFolders = folderHolder.getFolders();
+      while(studentFolders.hasNext()){
+        var studentFolder = studentFolders.next();
+        if(studentFolder.getName().indexOf(names[0]) > -1 && studentFolder.getName().indexOf(names[1]) > -1){
+          var infoFolders = studentFolder.getFolders();
+          while(infoFolders.hasNext()){
+            var infoHolder = infoFolders.next();
+            if(infoHolder.getName().indexOf("Archived IIP") > -1){
+              return infoHolder;
+            }
+          }
+        }
+        else{
+          var newFolder = folderHolder.createFolder(names[1]+","+names[0]);
+          return newFolder.createFolder('Archived IIP\'s');
+          
+        }
+      }
+    }    
+  }
   
+}
+
+function getStudentYear(yearString){
+  var year = yearString.substring(9,13);
+  return year;
+}
+
+function getArrayNames(yearFile){
+  var fileName = yearFile.getName();
+  var index = fileName.indexOf("-");
+  var index2 = fileName.indexOf("-", index+1);
+  var name = fileName.substring(index+2, index2);
+  name = name.split(" ");
+  return name;
 }
 
 function archiveSheets(){
@@ -50,7 +93,7 @@ function archiveSheets(){
   while(sheetFolder.hasNext()){
     var sheetHolder = sheetFolder.next();
     if(sheetHolder.getName().indexOf("TEMPLATE") == -1){
-
+      
       var studentFolder = DriveApp.getFoldersByName(sheetHolder.getName());
       if(studentFolder.hasNext()){
         
