@@ -6,6 +6,23 @@ function onOpen() {
   .addToUi();
 }
 
+function archiveSheets(){
+  var folders = DriveApp.getFoldersByName("IIP Tracking").next().getFolders();//.next().getFiles();
+  var sheetFolder = null;
+  var studentFolder = null;
+ 
+  while(folders.hasNext()){
+    var folder = folders.next();
+    if(folder.getName() == "Accommodations Tracking"){
+      sheetFolder = folder;
+    }
+    else if(folder.getName() == "Student Files"){
+      studentFolder = folder; 
+    }
+  }
+
+}
+
 function newYearSheets() {
   var files = DriveApp.getFoldersByName("Accommodations Tracking").next().getFiles();
   
