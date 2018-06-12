@@ -9,62 +9,95 @@ function onOpen() {
 function archiveSheets(){
   var folders = DriveApp.getFoldersByName("IIP Tracking").next().getFolders();//.next().getFiles();
   var sheetFolder = null;
-  var studentFolder = null;
- 
+  var yearFolders = null;
+  
   while(folders.hasNext()){
     var folder = folders.next();
     if(folder.getName() == "Accommodations Tracking"){
       sheetFolder = folder.getFiles();
     }
     else if(folder.getName() == "Student Files"){
-      studentFolder = folder.getFiles(); 
+      yearFolders = folder.getFolders(); 
     }
   }
   //Don't want to create a new studentFolder iterator everytime -> arrays?
-//  while(sheetFolder.hasNext()){
-//    var sheetHolder = sheetFolder.next();
-//    if(sheetHolder.getName().indexOf("TEMPLATE") == -1){
-//      var stdName = standardName(sheetHolder.getName());
-//      
-//    }
-//    
-//  }
+  //  while(sheetFolder.hasNext()){
+  //    var sheetHolder = sheetFolder.next();
+  //    if(sheetHolder.getName().indexOf("TEMPLATE") == -1){
+  //      var stdName = standardName(sheetHolder.getName());
+  //      
+  //    }
+  //    
+  //  }
   
   //this is not the best option but it'll do
   while(sheetFolder.hasNext()){
     var sheetHolder = sheetFolder.next();
-    var studentFolder = DriveApp.getFoldersByName(sheetHolder.getName());
-    if(studentFolder.hasNext()){
+    
+    if(sheetHolder.getName() == "Test, Test"){
       
-      studentFolder = studentFolder.next();
-      var ss = SpreadsheetApp.open(sheetHolder);
-      console.log(ss.getName());
-      var sheets = ss.getSheets();
-      var archiveSheet = sheets[sheets.length-1];
-      
-      hideSheets(sheets);//GAS does not export hidden sheets
-      var theBlob = ss.getBlob().getAs('application/pdf').setName(ss.getName()+" "+(new Date).getFullYear());
-      var newFile = studentFolder.createFile(theBlob);
-      displaySheets(sheets);
+      var studentFolder = DriveApp.getFoldersByName(sheetHolder.getName());
+      if(studentFolder.hasNext()){
+        
+        studentFolder = studentFolder.next();
+        var ss = SpreadsheetApp.open(sheetHolder);
+        console.log(ss.getName());
+        var sheets = ss.getSheets();
+        
+        hideSheets(sheets);//GAS does not export hidden sheets
+        var theBlob = ss.getBlob().getAs('application/pdf').setName(ss.getName()+" "+(new Date).getFullYear());
+        var newFile = studentFolder.createFile(theBlob);
+        displaySheets(sheets);
+      }
+      else{
+        //new students 
+        var ss = SpreadsheetApp.open(sheetHolder);
+        var classYear = getClassYear(ss);
+        
+        while(yearFolders.hasNext()){
+          var yearHolder = yearFolders.next();
+          if(yearHolder.getName().indexOf(classYear) > -1){
+            var newFolder = yearHolder.createFolder(ss.getName());
+            var sheets = ss.getSheets();
+            
+            hideSheets(sheets);//GAS does not export hidden sheets
+            var theBlob = ss.getBlob().getAs('application/pdf').setName(ss.getName()+" "+(new Date).getFullYear());
+            var newFile = newFolder.createFile(theBlob);
+            displaySheets(sheets);
+            
+          }
+        }
+        
+      }
+      //console.log(studentFolder);
     }
-    else{
-     //new students 
-      
-    }
-    //console.log(studentFolder);
   }
   
-
 }
+
+function getClassYear(ss){
+  var sheets = ss.getSheets();
+  var sheet = sheets[sheets.length-1];
+  var gradeSTR = sheet.getRange(2,1).getDisplayValue();
+  var index = gradeSTR.indexOf(":");
+  var subs = gradeSTR.substring(index+1, index+4).trim();
+  var grade = Number(subs);
+  
+  var curYear = Number((new Date()).getFullYear());
+  var classYear = (12-grade)+curYear;
+  
+  return classYear;
+}
+
 function hideSheets(sheets){
   for(var i = 0; i< sheets.length-1; i++){
-   sheets[i].hideSheet(); 
+    sheets[i].hideSheet(); 
   }
 }
 
 function displaySheets(sheets){
   for(var i = 0; i< sheets.length-1; i++){
-   sheets[i].showSheet(); 
+    sheets[i].showSheet(); 
   }
 }
 
