@@ -3,8 +3,23 @@ function onOpen() {
   ui.createMenu('Tracking Sheets')
   .addItem("Create new Tracking Sheets", "newYearSheets")
   .addItem("Archive Tracking Sheets", "archiveSheets")
+   .addItem("Archive IIPs", "archiveIIPs")
   //.addItem("Remove Last Sheet", "removeLastSheet")//too dangerous
   .addToUi();
+}
+function archiveIIPs(){
+ var yearFolders = DriveApp.getFolderById("0B1FKC1RnG8DpNGNmYV9FWEt6eWc").getFolders();
+  while(yearFolders.hasNext()){
+    var yearHolder = yearFolders.next();
+    var yearFiles = yearHolder.getFiles();
+    while(yearFiles.hasNext()){
+     var yrFileHolder = yearFiles.next();
+      var names = getArrayNames(yrFileHolder);
+    }
+  }
+}
+function getArrayNames(yearFile){
+  
 }
 
 function archiveSheets(){
@@ -35,7 +50,7 @@ function archiveSheets(){
   while(sheetFolder.hasNext()){
     var sheetHolder = sheetFolder.next();
     if(sheetHolder.getName().indexOf("TEMPLATE") == -1){
-      
+
       var studentFolder = DriveApp.getFoldersByName(sheetHolder.getName());
       if(studentFolder.hasNext()){
         
