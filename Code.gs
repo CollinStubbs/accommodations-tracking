@@ -14,13 +14,71 @@ function archiveSheets(){
   while(folders.hasNext()){
     var folder = folders.next();
     if(folder.getName() == "Accommodations Tracking"){
-      sheetFolder = folder;
+      sheetFolder = folder.getFiles();
     }
     else if(folder.getName() == "Student Files"){
-      studentFolder = folder; 
+      studentFolder = folder.getFiles(); 
     }
   }
+  //Don't want to create a new studentFolder iterator everytime -> arrays?
+//  while(sheetFolder.hasNext()){
+//    var sheetHolder = sheetFolder.next();
+//    if(sheetHolder.getName().indexOf("TEMPLATE") == -1){
+//      var stdName = standardName(sheetHolder.getName());
+//      
+//    }
+//    
+//  }
+  
+  //this is not the best option but it'll do
+  while(sheetFolder.hasNext()){
+    var sheetHolder = sheetFolder.next();
+    var studentFolder = DriveApp.getFoldersByName(sheetHolder.getName());
+    if(studentFolder.hasNext()){
+      
+      studentFolder = studentFolder.next();
+      var ss = SpreadsheetApp.open(sheetHolder);
+      console.log(ss.getName());
+      var sheets = ss.getSheets();
+      var archiveSheet = sheets[sheets.length-1];
+      
+      hideSheets(sheets);//GAS does not export hidden sheets
+      var theBlob = ss.getBlob().getAs('application/pdf').setName(ss.getName()+" "+(new Date).getFullYear());
+      var newFile = studentFolder.createFile(theBlob);
+      displaySheets(sheets);
+    }
+    else{
+     //new students 
+      
+    }
+    //console.log(studentFolder);
+  }
+  
 
+}
+function hideSheets(sheets){
+  for(var i = 0; i< sheets.length-1; i++){
+   sheets[i].hideSheet(); 
+  }
+}
+
+function displaySheets(sheets){
+  for(var i = 0; i< sheets.length-1; i++){
+   sheets[i].showSheet(); 
+  }
+}
+
+function standardName(name){
+  var std = "";
+  
+  name = name.toLowerCase();
+  var splitter = name.split(',');
+  var first = splitter[1].trim();
+  var last = splitter[0].trim();
+  
+  std = first+last;
+  
+  return std;
 }
 
 function newYearSheets() {
