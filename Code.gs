@@ -2,6 +2,7 @@ function onOpen() {
   var ui = SpreadsheetApp.getUi();
   ui.createMenu('Tracking Sheets')
   .addItem("Create new Tracking Sheets", "newYearSheets")
+  .addItem("Archive Tracking Sheets", "archiveSheets")
   .addToUi();
 }
 
