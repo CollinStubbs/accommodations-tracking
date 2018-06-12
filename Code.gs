@@ -3,6 +3,7 @@ function onOpen() {
   ui.createMenu('Tracking Sheets')
   .addItem("Create new Tracking Sheets", "newYearSheets")
   .addItem("Archive Tracking Sheets", "archiveSheets")
+  //.addItem("Remove Last Sheet", "removeLastSheet")//too dangerous
   .addToUi();
 }
 
@@ -33,8 +34,7 @@ function archiveSheets(){
   //this is not the best option but it'll do
   while(sheetFolder.hasNext()){
     var sheetHolder = sheetFolder.next();
-    
-    if(sheetHolder.getName() == "Test, Test"){
+    if(sheetHolder.getName().indexOf("TEMPLATE") == -1){
       
       var studentFolder = DriveApp.getFoldersByName(sheetHolder.getName());
       if(studentFolder.hasNext()){
@@ -144,6 +144,25 @@ function newYearSheets() {
         newsheet.getRange(2,1).setValue("Grade: "+newGrade);
         
       }
+      // }
+    }
+  }
+}
+
+function removeLastSheet(){
+  var files = DriveApp.getFoldersByName("Accommodations Tracking").next().getFiles();
+  
+  while(files.hasNext()){
+    var file = files.next();
+    var name = file.getName();
+    if(name.indexOf("TEMPLATE") > -1){
+      
+    }
+    else{
+      var ss = SpreadsheetApp.open(file);
+      var sheets = ss.getSheets();
+      var sheet = sheets[sheets.length-1]; 
+      ss.deleteSheet(sheet);
       // }
     }
   }
