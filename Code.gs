@@ -29,13 +29,17 @@ function archiveIIPs(){
   var yearFolders = DriveApp.getFolderById("0B1FKC1RnG8DpNGNmYV9FWEt6eWc").getFolders();
   while(yearFolders.hasNext()){
     var yearHolder = yearFolders.next();
-    var yearFiles = yearHolder.getFiles();
-    while(yearFiles.hasNext()){
-      var yrFileHolder = yearFiles.next();
-      var names = getArrayNames(yrFileHolder);
-      var studentArchiveFolder = findArchiveFolder(names, getStudentYear(yearHolder.getName()), true);
-      var theBlob = yrFileHolder.getBlob().getAs('application/pdf').setName(yrFileHolder.getName());
-      var newFile = studentArchiveFolder.createFile(theBlob);
+    if(yearHolder.getName() != "0 - IIP Template and Resources"){
+      var yearFiles = yearHolder.getFiles();
+      while(yearFiles.hasNext()){
+        var yrFileHolder = yearFiles.next();
+        if(yrFileHolder.getName() != "IIP Template"){
+          var names = getArrayNames(yrFileHolder);
+          var studentArchiveFolder = findArchiveFolder(names, getStudentYear(yearHolder.getName()), true);
+          var theBlob = yrFileHolder.getBlob().getAs('application/pdf').setName(yrFileHolder.getName());
+          var newFile = studentArchiveFolder.createFile(theBlob);
+        }
+      }
     }
   }
 }
